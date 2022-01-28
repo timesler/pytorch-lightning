@@ -121,7 +121,6 @@ def test_tqdm_progress_bar_totals(tmpdir):
 
     # test progress bar should have reached the end
     assert bar.test_progress_bar.n == k
-    assert bar.test_batch_idx == k
 
 
 def test_tqdm_progress_bar_fast_dev_run(tmpdir):

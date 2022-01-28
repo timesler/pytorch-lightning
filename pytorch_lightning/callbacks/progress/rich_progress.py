@@ -359,14 +359,14 @@ class RichProgressBar(ProgressBarBase):
                 f"[{self.theme.description}]{description}", total=total_batches, visible=visible
             )
 
-    def _update(self, progress_bar_id: int, current: int, total: int, visible: bool = True) -> None:
+    def _update(self, progress_bar_id: int, current: int, total: Union[int, float], visible: bool = True) -> None:
         if self.progress is not None and self._should_update(current, total):
             left_over = current % self.refresh_rate
             advance = left_over if (current == total and left_over != 0) else self.refresh_rate
             self.progress.update(progress_bar_id, advance=advance, visible=visible)
             self.refresh()
 
-    def _should_update(self, current: int, total: int) -> bool:
+    def _should_update(self, current: int, total: Union[int, float]) -> bool:
         return self.is_enabled and (current % self.refresh_rate == 0 or current == total)
 
     def on_validation_epoch_end(self, trainer, pl_module):

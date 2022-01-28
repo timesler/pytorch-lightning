@@ -48,9 +48,9 @@ class ProgressBarBase(Callback):
 
     def __init__(self) -> None:
         self._trainer: Optional["pl.Trainer"] = None
-        self._val_progress = None
-        self._test_progress = None
-        self._predict_progress = None
+        self._val_progress: Optional[int] = None
+        self._test_progress: Optional[int] = None
+        self._predict_progress: Optional[int] = None
 
     @property
     def trainer(self) -> "pl.Trainer":
@@ -66,16 +66,22 @@ class ProgressBarBase(Callback):
         """
         return self.trainer.fit_loop.epoch_loop.batch_progress.current.processed
 
-    def on_validation_batch_start(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+    def on_validation_batch_start(
+        self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", batch: Any, batch_idx: int, dataloader_idx: int
+    ):
         if self._val_progress is None or batch_idx == 0:
             max_batches = trainer.num_sanity_val_batches if trainer.sanity_checking else trainer.num_val_batches
             self._val_progress = sum(max_batches[:dataloader_idx])
 
-    def on_test_batch_start(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+    def on_test_batch_start(
+        self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", batch: Any, batch_idx: int, dataloader_idx: int
+    ):
         if self._test_progress is None or batch_idx == 0:
             self._test_progress = sum(trainer.num_test_batches[:dataloader_idx])
 
-    def on_predict_batch_start(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+    def on_predict_batch_start(
+        self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", batch: Any, batch_idx: int, dataloader_idx: int
+    ):
         if self._predict_progress is None or batch_idx == 0:
             self._predict_progress = sum(trainer.num_predict_batches[:dataloader_idx])
 

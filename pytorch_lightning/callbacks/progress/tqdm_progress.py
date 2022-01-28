@@ -288,13 +288,13 @@ class TQDMProgressBar(ProgressBarBase):
             self.val_progress_bar = self.init_validation_tqdm()
             self.val_progress_bar.total = convert_inf(self.total_val_batches)
 
-    def on_validation_batch_start(self, *args, **kwargs):
+    def on_validation_batch_start(self, *args: Any, **kwargs: Any):
         return super().on_validation_batch_start(*args, **kwargs)
 
-    def on_test_batch_start(self, *args, **kwargs):
+    def on_test_batch_start(self, *args: Any, **kwargs: Any):
         return super().on_test_batch_start(*args, **kwargs)
 
-    def on_predict_batch_start(self, *args, **kwargs):
+    def on_predict_batch_start(self, *args: Any, **kwargs: Any):
         return super().on_predict_batch_start(*args, **kwargs)
 
     def on_validation_batch_end(self, trainer: "pl.Trainer", *_: Any) -> None:
@@ -317,7 +317,7 @@ class TQDMProgressBar(ProgressBarBase):
         if self._should_update(self.test_batch_idx, self.total_test_batches):
             _update_n(self.test_progress_bar, self.test_batch_idx)
 
-    def on_test_end(self, trainer, pl_module) -> None:
+    def on_test_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
         self.test_progress_bar.close()
         super().on_test_end(trainer, pl_module)
 
@@ -329,7 +329,7 @@ class TQDMProgressBar(ProgressBarBase):
         if self._should_update(self.predict_batch_idx, self.total_predict_batches):
             _update_n(self.predict_progress_bar, self.predict_batch_idx)
 
-    def on_predict_end(self, trainer, pl_module) -> None:
+    def on_predict_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
         self.predict_progress_bar.close()
         super().on_predict_end(trainer, pl_module)
 
@@ -349,7 +349,7 @@ class TQDMProgressBar(ProgressBarBase):
             s = sep.join(map(str, args))
             active_progress_bar.write(s, **kwargs)
 
-    def _should_update(self, current: int, total: int) -> bool:
+    def _should_update(self, current: int, total: Union[int, float]) -> bool:
         return self.refresh_rate > 0 and (current % self.refresh_rate == 0 or current == total)
 
     @staticmethod
