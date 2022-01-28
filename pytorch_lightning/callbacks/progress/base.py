@@ -48,6 +48,9 @@ class ProgressBarBase(Callback):
 
     def __init__(self) -> None:
         self._trainer: Optional["pl.Trainer"] = None
+        self._val_progress = None
+        self._test_progress = None
+        self._predict_progress = None
 
     @property
     def trainer(self) -> "pl.Trainer":
@@ -63,6 +66,28 @@ class ProgressBarBase(Callback):
         """
         return self.trainer.fit_loop.epoch_loop.batch_progress.current.processed
 
+    def on_validation_batch_start(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+        if self._val_progress is None or batch_idx == 0:
+            max_batches = trainer.num_sanity_val_batches if trainer.sanity_checking else trainer.num_val_batches
+            self._val_progress = sum(max_batches[:dataloader_idx])
+
+    def on_test_batch_start(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+        if self._test_progress is None or batch_idx == 0:
+            self._test_progress = sum(trainer.num_test_batches[:dataloader_idx])
+
+    def on_predict_batch_start(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+        if self._predict_progress is None or batch_idx == 0:
+            self._predict_progress = sum(trainer.num_predict_batches[:dataloader_idx])
+
+    def on_validation_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+        self._val_progress = None
+
+    def on_test_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+        self._test_progress = None
+
+    def on_predict_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+        self._predict_progress = None
+
     @property
     def val_batch_idx(self) -> int:
         """The number of batches processed during validation.
@@ -74,12 +99,8 @@ class ProgressBarBase(Callback):
         else:
             loop = self.trainer.validate_loop
 
-        dl_idx = loop.current_dataloader_idx
         current_batch_idx = loop.epoch_loop.batch_progress.current.processed
-        max_batches = (
-            self.trainer.num_sanity_val_batches if self.trainer.sanity_checking else self.trainer.num_val_batches
-        )
-        batch_idx = sum(max_batches[:dl_idx]) + current_batch_idx
+        batch_idx = self._val_progress + current_batch_idx
         return batch_idx
 
     @property
@@ -89,9 +110,8 @@ class ProgressBarBase(Callback):
         Use this to update your progress bar.
         """
         loop = self.trainer.test_loop
-        dl_idx = loop.current_dataloader_idx
         current_batch_idx = loop.epoch_loop.batch_progress.current.processed
-        batch_idx = sum(self.trainer.num_test_batches[:dl_idx]) + current_batch_idx
+        batch_idx = self._test_progress + current_batch_idx
         return batch_idx
 
     @property
@@ -101,9 +121,8 @@ class ProgressBarBase(Callback):
         Use this to update your progress bar.
         """
         loop = self.trainer.predict_loop
-        dl_idx = loop.current_dataloader_idx
         current_batch_idx = loop.epoch_loop.batch_progress.current.processed
-        batch_idx = sum(self.trainer.num_predict_batches[:dl_idx]) + current_batch_idx
+        batch_idx = self._predict_progress + current_batch_idx
         return batch_idx
 
     @property

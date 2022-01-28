@@ -305,12 +305,15 @@ class RichProgressBar(ProgressBarBase):
         self._init_progress(trainer)
 
     def on_predict_start(self, trainer, pl_module):
+        super().on_predict_start(trainer, pl_module)
         self._init_progress(trainer)
 
     def on_test_start(self, trainer, pl_module):
+        super().on_test_start(trainer, pl_module)
         self._init_progress(trainer)
 
     def on_validation_start(self, trainer, pl_module):
+        super().on_validation_start(trainer, pl_module)
         self._init_progress(trainer)
 
     def on_sanity_check_start(self, trainer, pl_module):
@@ -347,12 +350,9 @@ class RichProgressBar(ProgressBarBase):
         if trainer.sanity_checking:
             self.val_sanity_progress_bar_id = self._add_task(self.total_val_batches, self.sanity_check_description)
         else:
-            total_val_batches = self.total_val_batches
-            if self.total_train_batches != float("inf") and hasattr(trainer, "val_check_batch"):
-                # val can be checked multiple times per epoch
-                val_checks_per_epoch = self.total_train_batches // trainer.val_check_batch
-                total_val_batches = self.total_val_batches * val_checks_per_epoch
-            self.val_progress_bar_id = self._add_task(total_val_batches, self.validation_description, visible=False)
+            self.val_progress_bar_id = self._add_task(
+                self.total_val_batches, self.validation_description, visible=False
+            )
 
         self.refresh()
 
@@ -375,6 +375,15 @@ class RichProgressBar(ProgressBarBase):
 
     def _should_update(self, current: int, total: int) -> bool:
         return self.is_enabled and (current % self.refresh_rate == 0 or current == total)
+
+    def on_validation_batch_start(self, *args, **kwargs):
+        return super().on_validation_batch_start(*args, **kwargs)
+
+    def on_test_batch_start(self, *args, **kwargs):
+        return super().on_test_batch_start(*args, **kwargs)
+
+    def on_predict_batch_start(self, *args, **kwargs):
+        return super().on_predict_batch_start(*args, **kwargs)
 
     def on_test_epoch_start(self, trainer, pl_module):
         self.test_progress_bar_id = self._add_task(self.total_test_batches, self.test_description)

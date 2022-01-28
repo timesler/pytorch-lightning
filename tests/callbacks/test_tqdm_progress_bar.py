@@ -101,7 +101,6 @@ def test_tqdm_progress_bar_totals(tmpdir):
 
     # val progress bar should have reached the end
     assert bar.val_progress_bar.n == m
-    assert bar.val_batch_idx == m
 
     # check that the test progress bar is off
     assert 0 == bar.total_test_batches
@@ -112,7 +111,6 @@ def test_tqdm_progress_bar_totals(tmpdir):
 
     assert bar.val_progress_bar.total == m
     assert bar.val_progress_bar.n == m
-    assert bar.val_batch_idx == m
 
     trainer.test(model)
 
@@ -139,8 +137,7 @@ def test_tqdm_progress_bar_fast_dev_run(tmpdir):
 
     assert 1 == progress_bar.total_val_batches
     assert 1 == progress_bar.train_batch_idx
-    assert 1 == progress_bar.val_batch_idx
-    assert 0 == progress_bar.test_batch_idx
+    assert 1 == progress_bar.val_progress_bar.n
 
     # the main progress bar should display 2 batches (1 train, 1 val)
     assert 2 == progress_bar.main_progress_bar.total
@@ -149,14 +146,12 @@ def test_tqdm_progress_bar_fast_dev_run(tmpdir):
     trainer.validate(model)
 
     # the validation progress bar should display 1 batch
-    assert 1 == progress_bar.val_batch_idx
     assert 1 == progress_bar.val_progress_bar.total
     assert 1 == progress_bar.val_progress_bar.n
 
     trainer.test(model)
 
     # the test progress bar should display 1 batch
-    assert 1 == progress_bar.test_batch_idx
     assert 1 == progress_bar.test_progress_bar.total
     assert 1 == progress_bar.test_progress_bar.n
 
@@ -298,10 +293,10 @@ class MockTqdm(Tqdm):
         [2, 3, 1, [1, 2, 3, 4, 5], [1, 2, 3]],
         [0, 0, 3, None, None],
         [1, 0, 3, [1], None],
-        [1, 1, 3, [2], [1]],
+        [1, 1, 3, [1, 2], [1]],
         [5, 0, 3, [3, 5], None],
-        [5, 2, 3, [3, 7], [2]],
-        [5, 2, 6, [7], [2]],
+        [5, 2, 3, [3, 5, 7], [2]],
+        [5, 2, 6, [5, 7], [2]],
     ],
 )
 def test_main_progress_bar_update_amount(
