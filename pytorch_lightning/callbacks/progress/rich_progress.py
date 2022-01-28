@@ -305,15 +305,12 @@ class RichProgressBar(ProgressBarBase):
         self._init_progress(trainer)
 
     def on_predict_start(self, trainer, pl_module):
-        super().on_predict_start(trainer, pl_module)
         self._init_progress(trainer)
 
     def on_test_start(self, trainer, pl_module):
-        super().on_test_start(trainer, pl_module)
         self._init_progress(trainer)
 
     def on_validation_start(self, trainer, pl_module):
-        super().on_validation_start(trainer, pl_module)
         self._init_progress(trainer)
 
     def on_sanity_check_start(self, trainer, pl_module):
