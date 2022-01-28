@@ -353,10 +353,6 @@ class RichProgressBar(ProgressBarBase):
 
         self.refresh()
 
-    def on_validation_epoch_end(self, trainer, pl_module):
-        if self.val_progress_bar_id is not None and trainer.state.fn == "fit":
-            self._update(self.val_progress_bar_id, self.val_batch_idx, self.total_val_batches, visible=False)
-
     def _add_task(self, total_batches: int, description: str, visible: bool = True) -> Optional[int]:
         if self.progress is not None:
             return self.progress.add_task(
@@ -372,6 +368,11 @@ class RichProgressBar(ProgressBarBase):
 
     def _should_update(self, current: int, total: int) -> bool:
         return self.is_enabled and (current % self.refresh_rate == 0 or current == total)
+
+    def on_validation_epoch_end(self, trainer, pl_module):
+        # this is called just to vanish the validation progress bar during .fit
+        if self.val_progress_bar_id is not None and trainer.state.fn == "fit":
+            self._update(self.val_progress_bar_id, self.val_batch_idx, self.total_val_batches, visible=False)
 
     def on_validation_batch_start(self, *args, **kwargs):
         return super().on_validation_batch_start(*args, **kwargs)

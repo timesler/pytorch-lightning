@@ -319,7 +319,7 @@ class TQDMProgressBar(ProgressBarBase):
 
     def on_test_end(self, trainer, pl_module) -> None:
         self.test_progress_bar.close()
-        super().on_validation_end(trainer, pl_module)
+        super().on_test_end(trainer, pl_module)
 
     def on_predict_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
         self.predict_progress_bar = self.init_predict_tqdm()
@@ -331,7 +331,7 @@ class TQDMProgressBar(ProgressBarBase):
 
     def on_predict_end(self, trainer, pl_module) -> None:
         self.predict_progress_bar.close()
-        super().on_validation_end(trainer, pl_module)
+        super().on_predict_end(trainer, pl_module)
 
     def print(self, *args: Any, sep: str = " ", **kwargs: Any) -> None:
         active_progress_bar = None
